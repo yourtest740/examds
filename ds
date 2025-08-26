@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proctored Google Form</title>
+  <script>
+    let tabSwitches = 0;
+    let userEmail = prompt("Enter your email for tracking:");
+
+    function validatePassword() {
+      let password = prompt("Enter exam password:");
+      if (password !== "ankit123") {
+        alert("Incorrect password! Access denied.");
+        window.location.href = "https://www.google.com"; // Redirect if incorrect
+      } else {
+        requestCameraMic();
+      }
+    }
+
+    function requestCameraMic() {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(function(stream) {
+        document.getElementById('video').srcObject = stream;
+        document.getElementById("examContainer").style.display = "flex";  // Show the exam only after camera access
+        document.getElementById("warning").style.display = "none"; // Hide warning message
+        startTimer(2700);
+      })
+      .catch(function(error) {
+        alert("Camera & Mic access is required for the exam.");
+        location.reload();
+      });
+    }
+
+    function trackTabSwitch() {
+      tabSwitches++;
+
+      // Capture Screenshot
+      html2canvas(document.body).then(canvas => {
+        let screenshotData = canvas.toDataURL("image/png").split(",")[1];
+
+        fetch("YOUR_WEB_APP_URL", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userEmail: userEmail, screenshotData: screenshotData })
+        })
+        .then(response => console.log("Tab switch logged"))
+        .catch(error => console.error("Error logging tab switch:", error));
+      });
+
+      alert("Warning! Do not switch tabs. Attempt logged.");
+    }
+
+    document.addEventListener("visibilitychange", function() {
+      if (document.hidden) {
+        trackTabSwitch();
+      }
+    });
+
+    function startTimer(duration) {
+      let timer = duration;
+      setInterval(function () {
+        let minutes = Math.floor(timer / 60);
+        let seconds = timer % 60;
+        document.getElementById('timer').textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+        if (--timer < 0) {
+          alert("Time up! Submitting exam...");
+          document.getElementById("examFrame").contentWindow.document.querySelector("form").submit();
+        }
+      }, 1000);
+    }
+
+    window.onload = validatePassword;
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+</head>
+<body>
+  <!-- Message if camera is not allowed -->
+  <h2 id="warning" style="text-align:center; color:red;">⚠ Please allow camera & mic access to start the exam.</h2>
+
+  <!-- Exam container (hidden initially) -->
+  <div id="examContainer" style="display: none; justify-content: space-between; height: 90vh;">
+    <iframe id="examFrame" src="https://forms.gle/oYSVhR7juRnfvdgp9" width="50%" height="100%" frameborder="0"></iframe>
+    <div style="width: 45%; text-align: center;">
+      <h2>Proctored Exam</h2>
+      <video id="video" width="100%" autoplay></video>
+      <h3>Time Left: <span id="timer">45:00</span></h3>
+    </div>
+  </div>
+</body>
+</html>
+
+
