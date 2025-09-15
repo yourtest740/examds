@@ -10,7 +10,7 @@
 
     function validatePassword() {
       let password = prompt("Enter exam password:");
-      if (password !== "ankit123") {
+      if (password !== "1231") {
         alert("Incorrect password! Access denied.");
         window.location.href = "https://www.google.com"; // Redirect if incorrect
       } else {
@@ -73,7 +73,7 @@
 
     window.onload = validatePassword;
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+  <script src="https://forms.gle/fomeYSCvtPzvs38a9"></script>
 </head>
 <body>
   <!-- Message if camera is not allowed -->
